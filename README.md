@@ -37,4 +37,4 @@ index=endpoint_logs EventCode=4688 New_Process_Name="*\\reg.exe" (CommandLine="*
 
 
 Author 
-Omar Said Bashir 
+Omar Said Taha Bashir 
