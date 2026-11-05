@@ -32,9 +32,9 @@ While monitoring registry activity, normal background checks from U.GG.exe trigg
 
 ```spl
 index=endpoint_logs EventCode=4688 New_Process_Name="*\\reg.exe" (CommandLine="*save*HKLM\\SAM*" OR CommandLine="*save*HKLM\\SYSTEM*") NOT (ParentProcessName="*\\U.GG.exe")
-| table _time, host, New_Process_Name, Process_Command_Line, Creator_Process_Name
+| table _time, host, New_Process_Name, Process_Command_Line, Creator_Process_Name 
 
-
+```
 
 Author 
 Omar Said Taha Bashir 
