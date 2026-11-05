@@ -1,6 +1,9 @@
 # SOC Tier 1 Home Lab - Endpoint Monitoring
 
-![SOC Banner](Screenshots/banner.png)
+![Splunk](https://img.shields.io/badge/SIEM-Splunk_Enterprise-65A637?style=for-the-badge&logo=splunk&logoColor=white)
+![Windows](https://img.shields.io/badge/Endpoint-Windows_10-0078D6?style=for-the-badge&logo=windows&logoColor=white)
+![Sysmon](https://img.shields.io/badge/Telemetry-Sysmon_%26_EventLogs-blue?style=for-the-badge)
+![MITRE](https://img.shields.io/badge/Framework-MITRE_ATT%26CK-red?style=for-the-badge)
 
 ## Overview
 This repository documents a home lab built to practice SOC Tier 1 monitoring, log analysis, and alert tuning. The setup collects Windows Security and Sysmon logs using Splunk Universal Forwarder and sends them to a Splunk Enterprise server for threat detection based on the MITRE ATT&CK framework.
@@ -30,7 +33,8 @@ While monitoring registry activity, normal background checks from U.GG.exe trigg
 ```spl
 index=endpoint_logs EventCode=4688 New_Process_Name="*\\reg.exe" (CommandLine="*save*HKLM\\SAM*" OR CommandLine="*save*HKLM\\SYSTEM*") NOT (ParentProcessName="*\\U.GG.exe")
 | table _time, host, New_Process_Name, Process_Command_Line, Creator_Process_Name
-```
 
-## Author
-Omar Said Bashir
+
+
+Author 
+Omar Said Bashir 
