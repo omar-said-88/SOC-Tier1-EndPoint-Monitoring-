@@ -16,7 +16,7 @@ This repository documents a home lab built to practice SOC Tier 1 monitoring, lo
 ## Monitoring Dashboard
 The dashboard (SOC - Endpoint Monitoring) tracks suspicious command executions, account changes, log clearing, and registry dumping in one view:
 
-![SOC Dashboard](Screenshots/dashboard.png)
+![SOC Dashboard](dashboard.png)
 
 ## Detection Scenarios
 
