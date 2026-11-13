@@ -1,0 +1,29 @@
+# ==============================================================================
+# SOC Tier 1 Home Lab - Splunk Detection & Hunting Queries (SPL)
+# Index: endpoint | Monitored Host: DESKTOP-GBS8LIH
+# ==============================================================================
+
+# 1. Suspicious Encoded PowerShell Execution (MITRE T1059.001 - Event ID 4688)
+index=endpoint EventCode=4688 New_Process_Name="*\\powershell.exe" (Process_Command_Line="*-enc*" OR Process_Command_Line="*-EncodedCommand*")
+| table _time, host, User, Parent_Process, Process_Name, Command_Line
+
+# 2. Defense Evasion - Audit Log Cleared (MITRE T1070.001 - Event ID 1102)
+index=endpoint EventCode=1102
+| table _time, host, SubjectUserName
+
+# 3. Credential Access - SAM/SYSTEM Registry Dumping [Tuned] (MITRE T1003.002 - Event ID 4688)
+index=endpoint EventCode=4688 New_Process_Name="*\\reg.exe" (Process_Command_Line="*save*HKLM\\SAM*" OR Process_Command_Line="*save*HKLM\\SYSTEM*") NOT (Creator_Process_Name="*\\U.GG.exe")
+| table _time, host, New_Process_Name, Process_Command_Line, Creator_Process_Name
+
+# 4. Persistence - Local Account Creation & Group Escalation (MITRE T1136.001 - Event IDs 4720, 4732)
+index=endpoint (EventCode=4720 OR EventCode=4732)
+| eval Action=if(EventCode=4720, "User Created", "Added to Group")
+| table _time, host, EventCode, Action, TargetUserName, SubjectUserName
+
+# 5. LOLBAS Process Execution Monitoring (MITRE T1105 - Sysmon Event ID 1)
+index=endpoint sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 (Image="*\\curl.exe" OR Image="*\\certutil.exe" OR Image="*\\bitsadmin.exe")
+| table _time, User, Image, CommandLine
+
+# 6. Outbound DNS Query Monitoring (MITRE T1071.004 - Sysmon Event ID 22)
+index=endpoint sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=22
+| table _time, Image, QueryName, QueryResults
