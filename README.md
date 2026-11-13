@@ -60,16 +60,20 @@ Full Tier 1 investigation documentation including forensic evidence, triage anal
 While monitoring registry activity, normal background checks from `U.GG.exe` triggered repeated false alerts. The SPL query was refined to exclude this process and focus strictly on `reg.exe save` commands targeting sensitive hives:
 
 ```spl
-index=endpoint_logs EventCode=4688 New_Process_Name="*\\reg.exe" (CommandLine="*save*HKLM\\SAM*" OR CommandLine="*save*HKLM\\SYSTEM*") NOT (ParentProcessName="*\\U.GG.exe")
+index=endpoint EventCode=4688 New_Process_Name="*\\reg.exe" (Process_Command_Line="*save*HKLM\\SAM*" OR Process_Command_Line="*save*HKLM\\SYSTEM*") NOT (Creator_Process_Name="*\\U.GG.exe")
 | table _time, host, New_Process_Name, Process_Command_Line, Creator_Process_Name
 ```
 
 ## Repository Structure
 ```text
-├── Screenshots/
-│   └── dashboard .png                        # Full Splunk SOC dashboard view
+├── configs/
+│   └── inputs.conf                           # Splunk Universal Forwarder log collection config
+├── queries/
+│   └── detection_queries.spl                 # Splunk SPL detection & hunting rules
 ├── reports/
 │   └── IR-2026-001-sysmon-lolbas-curl.md     # Tier 1 incident investigation report
+├── Screenshots/
+│   └── dashboard .png                        # Full Splunk SOC dashboard view
 └── README.md
 ```
 
