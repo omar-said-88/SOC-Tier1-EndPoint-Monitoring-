@@ -6,15 +6,38 @@
 ![MITRE](https://img.shields.io/badge/Framework-MITRE_ATT%26CK-red?style=for-the-badge)
 
 ## Overview
-This repository documents a home lab built to practice SOC Tier 1 monitoring, log analysis, and alert tuning. The setup collects Windows Security and Sysmon logs using Splunk Universal Forwarder and sends them to a Splunk Enterprise server for threat detection based on the MITRE ATT&CK framework.
+This repository documents a home lab built to practice SOC Tier 1 monitoring, log analysis, incident investigation, and alert tuning. The environment collects Windows Security and Sysmon logs using Splunk Universal Forwarder and forwards them to a Splunk Enterprise server for threat detection mapped to the MITRE ATT&CK framework.
 
 ## Lab Environment
-- SIEM: Splunk Enterprise (Ubuntu Server VM)
-- Endpoint: Windows VM (DESKTOP-GBS8LIH) with Universal Forwarder on port 9997
-- Data Sources: Windows Security Event Logs (4688, 4720, 4732, 1102) and Sysmon
+
+| Component | Configuration |
+| :--- | :--- |
+| SIEM Server | Splunk Enterprise on Ubuntu Server VM |
+| Monitored Endpoint | Windows Host (`DESKTOP-GBS8LIH`) |
+| Log Forwarding | Splunk Universal Forwarder (TCP Port `9997`) |
+| Telemetry Sources | Windows Security Logs (`4688`, `4720`, `4732`, `1102`) & Sysmon (`Event ID 1`, `22`) |
+
+## Lab Architecture
+
+```mermaid
+graph LR
+    subgraph "Windows Endpoint (DESKTOP-GBS8LIH)"
+        A[Windows Security Logs] --> C[Splunk Universal Forwarder]
+        B[Sysmon Telemetry] --> C
+    end
+
+    subgraph "Ubuntu Server VM"
+        C -- "TCP Port 9997" --> D[Splunk Enterprise Indexer]
+        D --> E[(index = endpoint)]
+    end
+
+    subgraph "SOC Analyst Console"
+        F[Splunk Web / SPL Hunting] -- "HTTP :8000" --> D
+    end
+```
 
 ## Monitoring Dashboard
-The dashboard (SOC - Endpoint Monitoring) tracks suspicious command executions, account changes, log clearing, and registry dumping in one view:
+The dashboard (`SOC - Endpoint Monitoring`) consolidates suspicious command executions, account persistence, log clearing, registry dumping, and Sysmon process/DNS telemetry in a single view:
 
 ![SOC Dashboard](Screenshots/dashboard%20.png)
 
@@ -22,19 +45,32 @@ The dashboard (SOC - Endpoint Monitoring) tracks suspicious command executions, 
 
 | Scenario | MITRE ID | Event ID | Description |
 | :--- | :--- | :--- | :--- |
-| Encoded PowerShell | T1059.001 | 4688 | Detects Base64 encoded PowerShell commands |
-| Account Persistence | T1136.001 | 4720, 4732 | Tracks local user creation and admin group changes |
-| Audit Log Cleared | T1070.001 | 1102 | Alerts when the Windows Security event log is wiped |
-| SAM Hive Dumping | T1003.002 | 4688 | Detects attempts to dump SAM or SYSTEM registry hives |
+| Encoded PowerShell | T1059.001 | 4688 (Security) | Detects Base64 encoded PowerShell commands |
+| Account Persistence | T1136.001 | 4720, 4732 (Security) | Tracks local user creation and admin group changes |
+| Audit Log Cleared | T1070.001 | 1102 (Security) | Alerts when the Windows Security event log is wiped |
+| SAM Hive Dumping | T1003.002 | 4688 (Security) | Detects attempts to dump SAM or SYSTEM registry hives |
+| LOLBAS Execution | T1105 | 1 (Sysmon) | Tracks suspicious binary execution (`curl.exe`) with full command-line details |
+| Outbound DNS Query | T1071.004 | 22 (Sysmon) | Logs external domain resolutions initiated by endpoint processes |
+
+## Incident Investigation Reports
+Full Tier 1 investigation documentation including forensic evidence, triage analysis, and tuning recommendations:
+- [IR-2026-001: Suspicious Outbound Connection via curl.exe](reports/IR-2026-001-sysmon-lolbas-curl.md)
 
 ## Alert Tuning (False Positive Reduction)
-While monitoring registry activity, normal background checks from U.GG.exe triggered repeated false alerts. The SPL query was updated to exclude this process and focus strictly on reg.exe save commands targeting sensitive hives:
+While monitoring registry activity, normal background checks from `U.GG.exe` triggered repeated false alerts. The SPL query was refined to exclude this process and focus strictly on `reg.exe save` commands targeting sensitive hives:
 
 ```spl
 index=endpoint_logs EventCode=4688 New_Process_Name="*\\reg.exe" (CommandLine="*save*HKLM\\SAM*" OR CommandLine="*save*HKLM\\SYSTEM*") NOT (ParentProcessName="*\\U.GG.exe")
-| table _time, host, New_Process_Name, Process_Command_Line, Creator_Process_Name 
-
+| table _time, host, New_Process_Name, Process_Command_Line, Creator_Process_Name
 ```
 
-Author 
-Omar Said Taha Bashir 
+## Repository Structure
+```text
+├── Screenshots/
+│   └── dashboard .png                        # Full Splunk SOC dashboard view
+├── reports/
+│   └── IR-2026-001-sysmon-lolbas-curl.md     # Tier 1 incident investigation report
+└── README.md
+```
+
+**Author:** Omar Said Taha Bashir
