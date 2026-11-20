@@ -53,7 +53,10 @@ The dashboard (`SOC - Endpoint Monitoring`) consolidates suspicious command exec
 
 ## Incident Investigation Reports
 Full Tier 1 investigation documentation including forensic evidence, triage analysis, and tuning recommendations:
-- [IR-2026-001: Suspicious Outbound Connection via curl.exe](reports/IR-2026-001-sysmon-lolbas-curl.md)
+
+- **[IR-2026-001: Suspicious Outbound Connection via curl.exe](reports/IR-2026-001-sysmon-lolbas-curl.md)**
+  - **Executive Summary:** Tier 1 investigation of simulated endpoint telemetry involving `curl.exe` execution and external DNS/network activity in the lab environment.
+  - **Outcome & Remediation:** Documented event timeline, verified host telemetry, mapped to MITRE ATT&CK, and applied containment/tuning recommendations to reduce noise.
 
 ## Alert Tuning (False Positive Reduction)
 While monitoring registry activity, normal background checks from `U.GG.exe` triggered repeated false alerts. The SPL query was refined to exclude this process and focus strictly on `reg.exe save` commands targeting sensitive hives:
@@ -72,7 +75,7 @@ index=endpoint EventCode=4688 New_Process_Name="*\\reg.exe" (Process_Command_Lin
 ├── reports/
 │   └── IR-2026-001-sysmon-lolbas-curl.md     # Tier 1 incident investigation report
 ├── Screenshots/
-│   └── dashboard .png                        # Full Splunk SOC dashboard view
+│   └── dashboard.png                         # Full Splunk SOC dashboard view
 └── README.md
 ```
 
