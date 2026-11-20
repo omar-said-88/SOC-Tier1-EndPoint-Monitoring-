@@ -38,8 +38,7 @@ graph LR
 
 ## Monitoring Dashboard
 The dashboard (`SOC - Endpoint Monitoring`) consolidates suspicious command executions, account persistence, log clearing, registry dumping, and Sysmon process/DNS telemetry in a single view:
-
-![SOC Dashboard](Screenshots/dashboard%20.png)
+![SOC Endpoint Monitoring Dashboard](Screenshots/dashboard.png)
 
 ## Detection Scenarios
 
